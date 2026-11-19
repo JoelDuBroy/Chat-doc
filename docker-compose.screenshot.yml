@@ -1,0 +1,6 @@
+# Temporary port remap so host :8000 (other project) does not block ChatDoc.
+# Delete after screenshots.
+services:
+  backend:
+    ports:
+      - "8001:8000"
