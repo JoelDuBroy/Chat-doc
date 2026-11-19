@@ -26,9 +26,11 @@ Latest question:
 {question}
 """
 
-EXPAND_PROMPT = """You prepare a search query for a document Q&A system (hybrid keyword + vector search).
+EXPAND_PROMPT = """You prepare a search query for a document Q&A system \
+(hybrid keyword + vector search).
 
-Given the user question and optional chat history, return ONE search query that will retrieve the most relevant passages from an uploaded document.
+Given the user question and optional chat history, return ONE search query \
+that will retrieve the most relevant passages from an uploaded document.
 
 Rules:
 - Resolve pronouns and vague references using chat history when present.

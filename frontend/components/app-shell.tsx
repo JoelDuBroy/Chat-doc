@@ -44,7 +44,9 @@ export function AppShell({ children, activeDocumentId }: AppShellProps) {
   const dragStartWidth = useRef(DEFAULT_WIDTH);
 
   useEffect(() => {
-    setWidth(readStoredWidth());
+    // Defer so we don't setState synchronously inside the effect body (react-hooks/set-state-in-effect).
+    const id = window.setTimeout(() => setWidth(readStoredWidth()), 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   const persistWidth = useCallback((next: number) => {

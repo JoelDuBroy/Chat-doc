@@ -168,9 +168,8 @@ async def stream_chat(
         )
         session.add(assistant_msg)
         await session.commit()
-        yield (
-            f"event: done\ndata: {json.dumps({'message_id': str(assistant_msg.id), 'refused': True})}\n\n"
-        )
+        done = json.dumps({"message_id": str(assistant_msg.id), "refused": True})
+        yield f"event: done\ndata: {done}\n\n"
         return
 
     context = _build_context(hits)
@@ -213,10 +212,12 @@ async def stream_chat(
             {
                 "role": "user",
                 "content": (
-                    "The passages above are from the uploaded document and appear related to the question. "
+                    "The passages above are from the uploaded document and appear "
+                    "related to the question. "
                     f"Answer this using only those passages: {user_message}. "
                     "If a detail is missing, say exactly which detail is missing. "
-                    "Do not claim the document has no relevant passages when they are present above."
+                    "Do not claim the document has no relevant passages when they "
+                    "are present above."
                 ),
             },
         ]
@@ -278,9 +279,10 @@ async def stream_chat(
     session.add(assistant_msg)
     await session.commit()
 
-    yield (
-        f"event: done\ndata: {json.dumps({'message_id': str(assistant_msg.id), 'refused': meta['refused']})}\n\n"
+    done = json.dumps(
+        {"message_id": str(assistant_msg.id), "refused": meta["refused"]}
     )
+    yield f"event: done\ndata: {done}\n\n"
 
 
 async def answer_once(

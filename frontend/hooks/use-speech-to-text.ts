@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 type SpeechRecognitionLike = {
   continuous: boolean;
@@ -33,6 +33,18 @@ function getSpeechRecognitionCtor(): SpeechRecognitionCtor | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
+function subscribeSpeechSupport() {
+  return () => {};
+}
+
+function getSpeechSupportSnapshot() {
+  return !!getSpeechRecognitionCtor();
+}
+
+function getSpeechSupportServerSnapshot() {
+  return true;
+}
+
 export type SpeechToTextStatus = "unsupported" | "idle" | "listening" | "error";
 
 export function useSpeechToText(options?: {
@@ -40,13 +52,20 @@ export function useSpeechToText(options?: {
   onFinal?: (transcript: string) => void;
   onInterim?: (transcript: string) => void;
 }) {
-  const [status, setStatus] = useState<SpeechToTextStatus>("idle");
+  const speechSupported = useSyncExternalStore(
+    subscribeSpeechSupport,
+    getSpeechSupportSnapshot,
+    getSpeechSupportServerSnapshot,
+  );
+  const [liveStatus, setLiveStatus] = useState<"idle" | "listening" | "error">("idle");
   const [error, setError] = useState("");
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const shouldListenRef = useRef(false);
   const onFinalRef = useRef(options?.onFinal);
   const onInterimRef = useRef(options?.onInterim);
   const lang = options?.lang ?? "en-US";
+
+  const status: SpeechToTextStatus = speechSupported ? liveStatus : "unsupported";
 
   useEffect(() => {
     onFinalRef.current = options?.onFinal;
@@ -56,7 +75,7 @@ export function useSpeechToText(options?: {
   useEffect(() => {
     const Ctor = getSpeechRecognitionCtor();
     if (!Ctor) {
-      setStatus("unsupported");
+      recognitionRef.current = null;
       return;
     }
 
@@ -82,7 +101,7 @@ export function useSpeechToText(options?: {
       if (event.error === "aborted" || event.error === "no-speech") return;
       shouldListenRef.current = false;
       setError(event.error || "Speech recognition failed.");
-      setStatus("error");
+      setLiveStatus("error");
     };
 
     recognition.onend = () => {
@@ -94,11 +113,10 @@ export function useSpeechToText(options?: {
           shouldListenRef.current = false;
         }
       }
-      setStatus((current) => (current === "unsupported" ? current : "idle"));
+      setLiveStatus("idle");
     };
 
     recognitionRef.current = recognition;
-    setStatus("idle");
 
     return () => {
       shouldListenRef.current = false;
@@ -117,17 +135,16 @@ export function useSpeechToText(options?: {
   const start = useCallback(() => {
     const recognition = recognitionRef.current;
     if (!recognition) {
-      setStatus("unsupported");
       return;
     }
     setError("");
     shouldListenRef.current = true;
     try {
       recognition.start();
-      setStatus("listening");
+      setLiveStatus("listening");
     } catch {
       // Already started
-      setStatus("listening");
+      setLiveStatus("listening");
     }
   }, []);
 
@@ -138,7 +155,7 @@ export function useSpeechToText(options?: {
     } catch {
       // ignore
     }
-    setStatus((current) => (current === "unsupported" ? current : "idle"));
+    setLiveStatus("idle");
   }, []);
 
   const toggle = useCallback(() => {

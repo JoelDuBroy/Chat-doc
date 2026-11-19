@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 
 import {
   addSessionToFolder,
@@ -44,20 +44,22 @@ export function useLibrary() {
     return map;
   }, [state.folders, state.sessions]);
 
+  // Module-level storage helpers are already stable; wrapping in useCallback
+  // trips react-hooks/use-memo (requires an inline function expression).
   return {
     state,
     unfiledSessions,
     sessionsByFolder,
-    upsertFile: useCallback(upsertFile, []),
-    removeFile: useCallback(removeFile, []),
-    upsertSession: useCallback(upsertSession, []),
-    removeSession: useCallback(removeSession, []),
-    moveSession: useCallback(moveSession, []),
-    addSessionToFolder: useCallback(addSessionToFolder, []),
-    createFolder: useCallback(createFolder, []),
-    renameFolder: useCallback(renameFolder, []),
-    deleteFolder: useCallback(deleteFolder, []),
-    toggleFolderCollapsed: useCallback(toggleFolderCollapsed, []),
-    syncLibraryFromDocuments: useCallback(syncLibraryFromDocuments, []),
+    upsertFile,
+    removeFile,
+    upsertSession,
+    removeSession,
+    moveSession,
+    addSessionToFolder,
+    createFolder,
+    renameFolder,
+    deleteFolder,
+    toggleFolderCollapsed,
+    syncLibraryFromDocuments,
   };
 }

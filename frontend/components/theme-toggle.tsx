@@ -2,7 +2,7 @@
 
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,13 +18,14 @@ type ThemeToggleProps = {
   variant?: "icon" | "menu";
 };
 
+function subscribeNowhere() {
+  return () => {};
+}
+
 export function ThemeToggle({ className, variant = "icon" }: ThemeToggleProps) {
   const { theme, resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Client-only mount gate without setState-in-effect (SSR snapshot is false).
+  const mounted = useSyncExternalStore(subscribeNowhere, () => true, () => false);
 
   // Avoid SSR/client icon/variant mismatches that trip the Next.js issues overlay.
   if (!mounted) {

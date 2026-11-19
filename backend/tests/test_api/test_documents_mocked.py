@@ -71,7 +71,7 @@ async def test_upload_unsupported_type(mock_client: AsyncClient):
         f"/api/v1/workspaces/{ws_id}/documents",
         files={"file": ("test.exe", io.BytesIO(b"data"), "application/octet-stream")},
     )
-    assert response.status_code == 400
+    assert response.status_code == 415
 
 
 @pytest.mark.asyncio

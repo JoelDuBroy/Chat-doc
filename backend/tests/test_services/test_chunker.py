@@ -44,12 +44,18 @@ def test_section_heading_metadata():
     pages = [
         PageContent(
             page_number=1,
-            text="# Vacation Days\nEmployees get leave.\n\n# Parental Leave\nPaid leave is available.",
+            text=(
+                "# Vacation Days\nEmployees get leave.\n\n"
+                "# Parental Leave\nPaid leave is available."
+            ),
         )
     ]
     chunks = chunk_pages(pages, chunk_size=200, chunk_overlap=20)
     assert chunks
-    assert any(chunk.metadata.get("section") and "Vacation" in chunk.metadata["section"] for chunk in chunks)
+    assert any(
+        chunk.metadata.get("section") and "Vacation" in chunk.metadata["section"]
+        for chunk in chunks
+    )
 
 
 def test_resume_keeps_company_with_dates():

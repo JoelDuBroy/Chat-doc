@@ -39,11 +39,19 @@ async def expand_neighbors(
                 bucket.add(neighbor)
 
     # Resolve missing chunk_index values from the DB.
-    missing_ids = [hit.chunk_id for hit in hits if not isinstance(hit.metadata.get("chunk_index"), int)]
+    missing_ids = [
+        hit.chunk_id
+        for hit in hits
+        if not isinstance(hit.metadata.get("chunk_index"), int)
+    ]
     index_by_id: dict[uuid.UUID, int] = {}
     if missing_ids:
         rows = (
-            await session.execute(select(Chunk.id, Chunk.chunk_index).where(Chunk.id.in_(missing_ids)))
+            await session.execute(
+                select(Chunk.id, Chunk.chunk_index).where(
+                    Chunk.id.in_(missing_ids)
+                )
+            )
         ).all()
         index_by_id = {row[0]: row[1] for row in rows}
         for hit in hits:

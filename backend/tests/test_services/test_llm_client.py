@@ -1,4 +1,9 @@
-from app.services.llm_client import REFUSAL_TEXT, SYSTEM_PROMPT, _llm_call_kwargs, _normalize_nvidia_model
+from app.services.llm_client import (
+    REFUSAL_TEXT,
+    SYSTEM_PROMPT,
+    _llm_call_kwargs,
+    _normalize_nvidia_model,
+)
 
 
 def test_system_prompt_answers_from_passages_without_a_canned_denial():

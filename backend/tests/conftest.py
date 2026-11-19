@@ -83,7 +83,10 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
             )
         )
         await conn.execute(
-            text("CREATE INDEX IF NOT EXISTS idx_chunks_content_tsv ON chunks USING GIN (content_tsv)")
+            text(
+                "CREATE INDEX IF NOT EXISTS idx_chunks_content_tsv "
+                "ON chunks USING GIN (content_tsv)"
+            )
         )
 
     async with session_factory() as session:

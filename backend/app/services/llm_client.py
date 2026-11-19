@@ -35,7 +35,8 @@ SYSTEM_PROMPT = (
     "Answer from those passages only. Read across all of them, including Document/Section labels.\n"
     "Prior chat turns may help resolve references; they are not document evidence. "
     "If a prior assistant message conflicts with the passages, trust the passages.\n"
-    "When summarizing, cover what the document is, main sections, and key facts from the passages.\n"
+    "When summarizing, cover what the document is, main sections, "
+    "and key facts from the passages.\n"
     "Connect dates, names, and section titles across passages. "
     "For employment, an end date of Present (or equivalent) means current.\n"
     "Paraphrase. The question does not have to match the file word for word.\n"
@@ -110,8 +111,12 @@ def _llm_call_kwargs(override: dict[str, Any] | None = None) -> dict[str, Any]:
         }
 
     if provider == "azure-openai":
+        if model and not model.startswith("azure/"):
+            azure_model = f"azure/{model}"
+        else:
+            azure_model = model or "azure/gpt-4o"
         return {
-            "model": f"azure/{model}" if model and not model.startswith("azure/") else (model or "azure/gpt-4o"),
+            "model": azure_model,
             "api_key": settings.OPENAI_API_KEY,
             "api_base": base_url or settings.OPENAI_API_BASE,
         }
@@ -174,7 +179,9 @@ async def stream_llm_response(
     max_tokens: int | None = None,
     override: dict[str, Any] | None = None,
 ) -> AsyncGenerator[str, None]:
-    provider = ((override or {}).get("provider") or settings.LLM_PROVIDER or "nvidia").strip().lower()
+    provider = (
+        (override or {}).get("provider") or settings.LLM_PROVIDER or "nvidia"
+    ).strip().lower()
     model = ((override or {}).get("model") or settings.LLM_MODEL or "").strip()
     try:
         kwargs = _llm_call_kwargs(override)

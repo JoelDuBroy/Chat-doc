@@ -64,7 +64,9 @@ export function Workspace() {
   const splitRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setSplit(readStoredSplit());
+    // Defer so we don't setState synchronously inside the effect body (react-hooks/set-state-in-effect).
+    const id = window.setTimeout(() => setSplit(readStoredSplit()), 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   useEffect(() => {
